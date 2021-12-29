@@ -433,7 +433,7 @@ def main():
         if result == "3":
             print(workInProgress)
             print("-----Aperte qualquer tecla para continuar-----")
-            x = input()
+            xx = input()
 
         if result == "4":
             return False   
