@@ -2,7 +2,7 @@
   time_intervals:
     # Intervalo de tempo para verificar se há heróis disponíveis para trabalhar
     # Valor padrão (em minutos): 10
-    send_heroes_for_work: 10
+    send_heroes_for_work: 15
     
     # Intervalo de tempo para atualizar a posição dos heróis no mapa
     # Valor padrão (em minutos): 3
@@ -18,7 +18,7 @@
 
     # Intervalo de tempo entre movimentos
     # Valor padrão (em segundos): 1
-    interval_between_moviments: 1
+    interval_between_moviments: 0.1
 
 
   # O quão confiante o bot precisa estar para clicar nos botões (valores entre 0 e 1. 0 é o valor mínimo, 1 é o valor máximo)
