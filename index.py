@@ -19,6 +19,27 @@ pause = config['time_intervals']['interval_between_moviments']
 pyautogui.PAUSE = pause
 
 cat = """
+
+──────▄▌▐▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀​▀▀▀▀▀▀▌
+───▄▄██▌█      É CARREGADO MAS      ▌
+▄▄▄▌▐██▌█        É MEU AMIGO        ▌
+███████▌█▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄​▄▄▄▄▄▄▌
+▀(@)▀▀▀▀▀▀▀(@)(@)▀▀▀▀▀▀▀▀▀▀▀▀▀​▀▀▀▀(@)▀
+
+__________                                             
+\______   \___.__.                                     
+ |    |  _<   |  |                                     
+ |    |   ||___  |                                     
+ |______  // ____|                                     
+        \/ \/       
+
+__________.__                                          
+\______   \__| _______  __ ____   ___________    ____  
+ |     ___/  |/  _ \  \/ // __ \ /  ___/\__  \  /    \ 
+ |    |   |  (  <_> )   /\  ___/ \___ \  / __ \|   |  |
+ |____|   |__|\____/ \_/  \___  >____  >(____  /___|  /
+                              \/     \/      \/     \/                                     
+
 >>---> Use ctrl + c para interromper o bot.
 
 >>---> Algumas configurações estão disponíveis no arquivo config.yaml."""
@@ -310,6 +331,7 @@ def main():
     global images
     images = load_images()
 
+    print(cat)
     time.sleep(7)
     t = config['time_intervals']
 
@@ -323,27 +345,38 @@ def main():
     # ============
 
     while True:
+        now = time.time()
         #remover randomidade, verificar a cada 10 minutos
 
-        refreshHeroes()
+        if now - last["check_for_captcha"] > t['check_for_captcha'] * 60:
+            last["check_for_captcha"] = now
 
-        sys.stdout.flush()
-        login()
+        if now - last["heroes"] > t['send_heroes_for_work'] * 60:
+            last["heroes"] = now
+            refreshHeroes()
 
-        if clickBtn(images['new-map']):
-            loggerMapClicked()
+        if now - last["login"] > t['check_for_login'] * 60:
+            sys.stdout.flush()
+            last["login"] = now
+            login()
 
-        refreshHeroesPositions()
+        if now - last["new_map"] > t['check_for_new_map_button']:
+            last["new_map"] = now
+
+            if clickBtn(images['new-map']):
+                loggerMapClicked()
+
+
+        if now - last["refresh_heroes"] > t['refresh_heroes_positions'] * 60:
+            last["refresh_heroes"] = now
+            refreshHeroesPositions()
 
         #clickBtn(teasureHunt)
         logger(None, progress_indicator=True)
 
         sys.stdout.flush()
 
-        ##usar time do config
         time.sleep(1)
-
-
 
 if __name__ == '__main__':
     main()
