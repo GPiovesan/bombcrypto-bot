@@ -6,16 +6,12 @@
     
     # Intervalo de tempo para atualizar a posição dos heróis no mapa
     # Valor padrão (em minutos): 3
-    refresh_heroes_positions: 3
+    refresh_heroes_positions: 5
     
     # Intervalo de tempo para verificar por novos mapas
     # Valor padrão (em segundos): 5
     check_for_new_map_button: 5
     
-    # Intervalo de tempo para verificar se precisa resolver o captcha.
-    # Valor padrão (em minutos): 1
-    check_for_captcha: 1
-
     # Intervalo de tempo para verificar se existe solicitação de login
     # Valor padrão (em minutos): 5
     check_for_login: 5

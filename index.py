@@ -339,7 +339,6 @@ def main():
     "login" : 0,
     "heroes" : 0,
     "new_map" : 0,
-    "check_for_captcha" : 0,
     "refresh_heroes" : 0
     }
     # ============
@@ -347,9 +346,6 @@ def main():
     while True:
         now = time.time()
         #remover randomidade, verificar a cada 10 minutos
-
-        if now - last["check_for_captcha"] > t['check_for_captcha'] * 60:
-            last["check_for_captcha"] = now
 
         if now - last["heroes"] > t['send_heroes_for_work'] * 60:
             last["heroes"] = now
