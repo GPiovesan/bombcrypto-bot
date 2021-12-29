@@ -44,10 +44,8 @@ __________.__
 
 >>---> Algumas configurações estão disponíveis no arquivo config.yaml."""
 
-
 def moveToPosition(x,y,t):
     pyautogui.moveTo(x,y,t+random()/2)
-
 
 def remove_suffix(input_string, suffix):
     """Returns the input_string without the suffix"""
@@ -332,7 +330,7 @@ def main():
     images = load_images()
 
     print(cat)
-    time.sleep(7)
+    time.sleep(5)
     t = config['time_intervals']
 
     last = {
@@ -362,16 +360,13 @@ def main():
             if clickBtn(images['new-map']):
                 loggerMapClicked()
 
-
         if now - last["refresh_heroes"] > t['refresh_heroes_positions'] * 60:
             last["refresh_heroes"] = now
             refreshHeroesPositions()
 
-        #clickBtn(teasureHunt)
         logger(None, progress_indicator=True)
 
         sys.stdout.flush()
-
         time.sleep(1)
 
 if __name__ == '__main__':
