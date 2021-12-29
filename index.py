@@ -15,7 +15,6 @@ import yaml
 stream = open("config.yaml", 'r')
 config = yaml.safe_load(stream)
 configThreshold = config['threshold']
-configHome = config['home']
 pause = config['time_intervals']['interval_between_moviments']
 pyautogui.PAUSE = pause
 
