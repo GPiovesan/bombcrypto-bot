@@ -37,6 +37,12 @@ pip install -r requirements.txt
 python3 index.py
 ```
 
+### Caso o comando acima não funcione, tente o comando
+
+```
+python index.py
+```
+
 ![run](https://github.com/mpcabete/bombcrypto-bot/raw/main/readme-images/run.png)
 
 
