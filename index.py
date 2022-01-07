@@ -77,10 +77,10 @@ workInProgress = """
 
 defaultMenuMessage = """
 Seja bem-vindo, você deseja:
-1 - 💣 Iniciar BomBot 
-2 - ⚙️ Abrir arquivo de configurações (Necessário executar o bot novamente para aplicar as alterações)
-3 - 💻 Definir numero de contas simultâneas (Work in Progress)
-4 - 🛑 Sair
+1 - Iniciar BomBot 
+2 - Abrir arquivo de configurações (Necessário executar o bot novamente para aplicar as alterações)
+3 - Definir numero de contas simultâneas (Work in Progress)
+4 - Sair
 """
 
 import os
@@ -403,6 +403,7 @@ def main():
 
                 if now - last["heroes"] > t['send_heroes_for_work'] * 60:
                     last["heroes"] = now
+                    login()
                     refreshHeroes()
 
                 if now - last["login"] > t['check_for_login'] * 60:
@@ -418,6 +419,7 @@ def main():
 
                 if now - last["refresh_heroes"] > t['refresh_heroes_positions'] * 60:
                     last["refresh_heroes"] = now
+                    login()
                     refreshHeroesPositions()
 
                 logger(None, progress_indicator=True)
