@@ -17,72 +17,6 @@ configThreshold = config['threshold']
 pause = config['time_intervals']['interval_between_moviments']
 pyautogui.PAUSE = pause
 
-startMessage = """ 
-__________              __________ ___________________
-\______   \ ____   _____\______   |\_____  \__    ___/
- |    |  _//  _ \ /     \|    |  _/ /   |   \|    |   
- |    |   (  <_> )  Y Y  \    |   \/    |    \    |   
- |______  /\____/|__|_|  /______  /\_______  /____|   
-        \/             \/       \/         \/         
-
-==================================================================
-
->>---> Você também pode contribuir com o projeto!, doando bcoin na carteira 0xF4d4e7Ed03F59B51232f9Cb55DA29943B7C91F20
->>---> Assim poderei continuar com o bot para futuras atualizações do bombcrypto ;)
-
-
->>---> Use ctrl + c para interromper o bot.
->>---> Algumas configurações estão disponíveis no arquivo config.yaml.
-
-==================================================================
-__________                                             
-\______   \___.__.                                     
- |    |  _<   |  |                                     
- |    |   ||___  |                                     
- |______  // ____|                                     
-        \/ \/       
-
-__________.__                                          
-\______   \__| _______  __ ____   ___________    ____  
- |     ___/  |/  _ \  \/ // __ \ /  ___/\__  \  /    \ 
- |    |   |  (  <_> )   /\  ___/ \___ \  / __ \|   |  |
- |____|   |__|\____/ \_/  \___  >____  >(____  /___|  /
-                              \/     \/      \/     \/   
-
-"""
-
-halfMessage = """
-==================================================================
-__________              __________ ___________________
-\______   \ ____   _____\______   |\_____  \__    ___/
- |    |  _//  _ \ /     \|    |  _/ /   |   \|    |   
- |    |   (  <_> )  Y Y  \    |   \/    |    \    |   
- |______  /\____/|__|_|  /______  /\_______  /____|   
-        \/             \/       \/         \/         
->>---> Doações de bcoin 0xF4d4e7Ed03F59B51232f9Cb55DA29943B7C91F20
-==================================================================
-"""
-
-workInProgress = """
-                           ___
-                            {-)   ||
-                       [m,].-"-.   /
-      [][__][__]         \(/\__/\)/
-      [_][_WORK__][__]~~~~  |  |
-      [__][__][IN][__][__] /   |
-      [_PROGRESS_][__][__]| /| |
-      [][__][__][__][__][]| || |  ~~~~
-      [__][__][__][__][__]__,__,  \__/
-"""
-
-defaultMenuMessage = """
-Seja bem-vindo, você deseja:
-1 - 💣 Iniciar BomBot 
-2 - ⚙️ Abrir arquivo de configurações (Necessário executar o bot novamente para aplicar as alterações)
-3 - 💻 Definir numero de contas simultâneas (Work in Progress)
-4 - 🛑 Sair
-"""
-
 import os
 def clearConsole():
     command = 'clear'
@@ -216,9 +150,9 @@ def clickGreenBarButtons():
     offset = 140
 
     green_bars = positions(images['green-bar'], threshold=configThreshold['green_bar'])
-    logger('🟩 %d green bars detected' % len(green_bars))
+    logger('%d green bars detected' % len(green_bars))
     buttons = positions(images['go-work'], threshold=configThreshold['go_to_work_btn'])
-    logger('🆗 %d buttons detected' % len(buttons))
+    logger('%d buttons detected' % len(buttons))
 
 
     not_working_green_bars = []
@@ -226,8 +160,8 @@ def clickGreenBarButtons():
         if not isWorking(bar, buttons):
             not_working_green_bars.append(bar)
     if len(not_working_green_bars) > 0:
-        logger('🆗 %d buttons with green bar detected' % len(not_working_green_bars))
-        logger('👆 Clicking in %d heroes' % len(not_working_green_bars))
+        logger('%d buttons with green bar detected' % len(not_working_green_bars))
+        logger('Clicking in %d heroes' % len(not_working_green_bars))
 
     # se tiver botao com y maior que bar y-10 e menor que y+10
     hero_clicks_cnt = 0
@@ -239,7 +173,7 @@ def clickGreenBarButtons():
         hero_clicks = hero_clicks + 1
         hero_clicks_cnt = hero_clicks_cnt + 1
         if hero_clicks_cnt > 20:
-            logger('⚠️ Too many hero clicks, try to increase the go_to_work_btn threshold')
+            logger('Too many hero clicks, try to increase the go_to_work_btn threshold')
             return
         #cv2.rectangle(sct_img, (x, y) , (x + w, y + h), (0,255,255),2)
     return len(not_working_green_bars)
@@ -255,7 +189,7 @@ def clickFullBarButtons():
             not_working_full_bars.append(bar)
 
     if len(not_working_full_bars) > 0:
-        logger('👆 Clicking in %d heroes' % len(not_working_full_bars))
+        logger('Clicking in %d heroes' % len(not_working_full_bars))
 
     for (x, y, w, h) in not_working_full_bars:
         moveToPosition(x+offset+(w/2),y+(h/2))
@@ -283,7 +217,7 @@ def goToGame():
 
 def refreshHeroesPositions():
 
-    logger('🔃 Refreshing Heroes Positions')
+    logger('Refreshing Heroes Positions')
     clickBtn(images['go-back-arrow'])
     clickBtn(images['treasure-hunt-icon'])
 
@@ -292,17 +226,17 @@ def refreshHeroesPositions():
 
 def login():
     global login_attempts
-    logger('😿 Checking if game has disconnected')
+    logger('Checking if game has disconnected')
 
     # Auto ctrl F5
     if login_attempts > 3:
-        logger('🔃 Too many login attempts, refreshing')
+        logger('Too many login attempts, refreshing')
         login_attempts = 0
         pyautogui.hotkey('ctrl','f5')
         return
 
     if clickBtn(images['connect-wallet'], timeout = 10):
-        logger('🎉 Connect wallet button detected, logging in!')
+        logger('Connect wallet button detected, logging in!')
         login_attempts = login_attempts + 1
         time.sleep(5)
 
@@ -333,16 +267,16 @@ def login():
         # print('ok button clicked')
 
 def refreshHeroes():
-    logger('🏢 Search for heroes to work')
+    logger('Search for heroes to work')
 
     goToHeroes() 
 
     if config['select_heroes_mode'] == "full":
-        logger('⚒️ Sending heroes with full stamina bar to work', 'green')
+        logger('Sending heroes with full stamina bar to work', 'green')
     elif config['select_heroes_mode'] == "green":
-        logger('⚒️ Sending heroes with green stamina bar to work', 'green')
+        logger('Sending heroes with green stamina bar to work', 'green')
     else:
-        logger('⚒️ Sending all heroes to work', 'green')
+        logger('Sending all heroes to work', 'green')
 
     buttonsClicked = 1
     empty_scrolls_attempts = config['scroll_attemps']
@@ -359,7 +293,7 @@ def refreshHeroes():
             empty_scrolls_attempts = empty_scrolls_attempts - 1
         scroll()
         time.sleep(2)
-    logger('💪 {} heroes sent to work'.format(hero_clicks))
+    logger('{} heroes sent to work'.format(hero_clicks))
     goToGame()
 
 def main():
@@ -378,9 +312,6 @@ def main():
     global images
     images = load_images()
 
-    print(startMessage)
-    time.sleep(5)
-
     t = config['time_intervals']
     last = {
     "login" : 0,
@@ -388,55 +319,38 @@ def main():
     "new_map" : 0,
     "refresh_heroes" : 0
     }
+
     # ============
     while True:
         clearConsole()
-        print(halfMessage)
-        print(defaultMenuMessage)
+        time.sleep(1)
 
-        result = input()
+        while True:
+            now = time.time()
 
-        if result == "1":         
-            while True:
-                now = time.time()
-                #remover randomidade, verificar a cada 10 minutos
+            if now - last["heroes"] > t['send_heroes_for_work'] * 60:
+                last["heroes"] = now
+                refreshHeroes()
 
-                if now - last["heroes"] > t['send_heroes_for_work'] * 60:
-                    last["heroes"] = now
-                    refreshHeroes()
-
-                if now - last["login"] > t['check_for_login'] * 60:
-                    sys.stdout.flush()
-                    last["login"] = now
-                    login()
-
-                if now - last["new_map"] > t['check_for_new_map_button']:
-                    last["new_map"] = now
-
-                    if clickBtn(images['new-map']):
-                        loggerMapClicked()
-
-                if now - last["refresh_heroes"] > t['refresh_heroes_positions'] * 60:
-                    last["refresh_heroes"] = now
-                    refreshHeroesPositions()
-
-                logger(None, progress_indicator=True)
-
+            if now - last["login"] > t['check_for_login'] * 60:
                 sys.stdout.flush()
-                time.sleep(1)
+                last["login"] = now
+                login()
+
+            if now - last["new_map"] > t['check_for_new_map_button']:
+                last["new_map"] = now
+
+                if clickBtn(images['new-map']):
+                    loggerMapClicked()
+
+            if now - last["refresh_heroes"] > t['refresh_heroes_positions'] * 60:
+                last["refresh_heroes"] = now
+                refreshHeroesPositions()
+
+            logger(None, progress_indicator=True)
+
+            sys.stdout.flush()
+            time.sleep(1)
         
-        if result == "2":
-            programName = "notepad.exe"
-            fileName = "config.yaml"
-            sp.Popen([programName, fileName])
-
-        if result == "3":
-            print(workInProgress)
-            print("-----Aperte qualquer tecla para continuar-----")
-            xx = input()
-
-        if result == "4":
-            return False   
-
 if __name__ == '__main__':
     main()
