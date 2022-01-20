@@ -328,23 +328,25 @@ def main():
         while True:
             now = time.time()
 
-            if now - last["heroes"] > t['send_heroes_for_work'] * 60:
-                last["heroes"] = now
-                refreshHeroes()
-
             if now - last["login"] > t['check_for_login'] * 60:
                 sys.stdout.flush()
                 last["login"] = now
                 login()
 
+            if now - last["heroes"] > t['send_heroes_for_work'] * 60:
+                last["heroes"] = now
+                login()
+                refreshHeroes()
+
             if now - last["new_map"] > t['check_for_new_map_button']:
                 last["new_map"] = now
 
-                if clickBtn(images['new-map']):
-                    loggerMapClicked()
+            if clickBtn(images['new-map']):
+                loggerMapClicked()
 
             if now - last["refresh_heroes"] > t['refresh_heroes_positions'] * 60:
                 last["refresh_heroes"] = now
+                login()
                 refreshHeroesPositions()
 
             logger(None, progress_indicator=True)
