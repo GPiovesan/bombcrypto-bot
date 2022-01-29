@@ -87,7 +87,6 @@ def clickBtn(img, timeout=3, threshold = configThreshold):
             if (count >= len(matches)):
                 return clicked
             
-
     return clicked
 
 def printSreen():
