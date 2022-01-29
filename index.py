@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-    
+from unittest import skip
 from src.logger import logger, loggerMapClicked
 from cv2 import cv2
 from os import listdir
@@ -11,10 +12,9 @@ import sys
 import yaml
 
 # Load config file.
-stream = open("config.yaml", 'r')
-config = yaml.safe_load(stream)
-configThreshold = config['threshold']
-pause = config['time_intervals']['interval_between_moviments']
+configThreshold = 0.8
+pause = 0.2
+
 pyautogui.PAUSE = pause
 
 import os
@@ -52,9 +52,8 @@ def load_images(dir_path='./targets/'):
 
     return targets
 
-def clickBtn(img, timeout=3, threshold = configThreshold['default']):
-    """Search for img in the screen, if found moves the cursor over it and clicks.
-    Parameters:
+def clickBtn(img, timeout=3, threshold = configThreshold):
+    """ Parameters:
         img: The image that will be used as an template to find where to click.
         timeout (int): Time in seconds that it will keep looking for the img before returning with fail
         threshold(float): How confident the bot needs to be to click the buttons (values from 0 to 1)
@@ -63,21 +62,33 @@ def clickBtn(img, timeout=3, threshold = configThreshold['default']):
     logger(None, progress_indicator=True)
     start = time.time()
     has_timed_out = False
+    clicked = False
+
     while(not has_timed_out):
         matches = positions(img, threshold=threshold)
+        count = 0
+        
+        for match in matches:
+            if(len(matches)==0):
+                has_timed_out = time.time()-start > timeout
+                continue
+            
+            x = match[[0]] 
+            y = match[[1]]
+            w = match[[2]]
+            h = match[[3]]
+        
+            pos_click_x = x+w/2
+            pos_click_y = y+h/2
+            moveToPosition(pos_click_x,pos_click_y)
+            pyautogui.click()
+            clicked = True
+            count += 1
+            if (count >= len(matches)):
+                return clicked
+            
 
-        if(len(matches)==0):
-            has_timed_out = time.time()-start > timeout
-            continue
-
-        x,y,w,h = matches[0]
-        pos_click_x = x+w/2
-        pos_click_y = y+h/2
-        moveToPosition(pos_click_x,pos_click_y)
-        pyautogui.click()
-        return True
-
-    return False
+    return clicked
 
 def printSreen():
     with mss.mss() as sct:
@@ -89,9 +100,10 @@ def printSreen():
         # Grab the data
         return sct_img[:,:,:3]
 
-def positions(target, threshold=configThreshold['default'],img = None):
+def positions(target, threshold = configThreshold, img = None):
     if img is None:
         img = printSreen()
+
     result = cv2.matchTemplate(img,target,cv2.TM_CCOEFF_NORMED)
     w = target.shape[1]
     h = target.shape[0]
@@ -107,104 +119,13 @@ def positions(target, threshold=configThreshold['default'],img = None):
     rectangles, weights = cv2.groupRectangles(rectangles, 1, 0.2)
     return rectangles
 
-def scroll():
-    commoms = positions(images['commom-text'], threshold = configThreshold['commom'])
-    if (len(commoms) == 0):
-        return
-    x,y,w,h = commoms[len(commoms)-1]
-#
-    moveToPosition(x,y)
-
-    if not config['use_click_and_drag_instead_of_scroll']:
-        pyautogui.scroll(-config['scroll_size'])
-    else:
-        pyautogui.dragRel(0,-config['click_and_drag_amount'],duration=1, button='left')
-
-
-def clickButtons():
-    buttons = positions(images['go-work'], threshold=configThreshold['go_to_work_btn'])
-    # print('buttons: {}'.format(len(buttons)))
-    for (x, y, w, h) in buttons:
-        moveToPosition(x+(w/2),y+(h/2))
-        pyautogui.click()
-        global hero_clicks
-        hero_clicks = hero_clicks + 1
-        #cv2.rectangle(sct_img, (x, y) , (x + w, y + h), (0,255,255),2)
-        if hero_clicks > 20:
-            logger('too many hero clicks, try to increase the go_to_work_btn threshold')
-            return
-    return len(buttons)
-
-def isWorking(bar, buttons):
-    y = bar[1]
-
-    for (_,button_y,_,button_h) in buttons:
-        isBelow = y < (button_y + button_h)
-        isAbove = y > (button_y - button_h)
-        if isBelow and isAbove:
-            return False
-    return True
-
-def clickGreenBarButtons():
-    # ele clicka nos q tao trabaiano mas axo q n importa
-    offset = 140
-
-    green_bars = positions(images['green-bar'], threshold=configThreshold['green_bar'])
-    logger('%d green bars detected' % len(green_bars))
-    buttons = positions(images['go-work'], threshold=configThreshold['go_to_work_btn'])
-    logger('%d buttons detected' % len(buttons))
-
-
-    not_working_green_bars = []
-    for bar in green_bars:
-        if not isWorking(bar, buttons):
-            not_working_green_bars.append(bar)
-    if len(not_working_green_bars) > 0:
-        logger('%d buttons with green bar detected' % len(not_working_green_bars))
-        logger('Clicking in %d heroes' % len(not_working_green_bars))
-
-    # se tiver botao com y maior que bar y-10 e menor que y+10
-    hero_clicks_cnt = 0
-    for (x, y, w, h) in not_working_green_bars:
-        # isWorking(y, buttons)
-        moveToPosition(x+offset+(w/2),y+(h/2))
-        pyautogui.click()
-        global hero_clicks
-        hero_clicks = hero_clicks + 1
-        hero_clicks_cnt = hero_clicks_cnt + 1
-        if hero_clicks_cnt > 20:
-            logger('Too many hero clicks, try to increase the go_to_work_btn threshold')
-            return
-        #cv2.rectangle(sct_img, (x, y) , (x + w, y + h), (0,255,255),2)
-    return len(not_working_green_bars)
-
-def clickFullBarButtons():
-    offset = 100
-    full_bars = positions(images['full-stamina'], threshold=configThreshold['default'])
-    buttons = positions(images['go-work'], threshold=configThreshold['go_to_work_btn'])
-
-    not_working_full_bars = []
-    for bar in full_bars:
-        if not isWorking(bar, buttons):
-            not_working_full_bars.append(bar)
-
-    if len(not_working_full_bars) > 0:
-        logger('Clicking in %d heroes' % len(not_working_full_bars))
-
-    for (x, y, w, h) in not_working_full_bars:
-        moveToPosition(x+offset+(w/2),y+(h/2))
-        pyautogui.click()
-        global hero_clicks
-        hero_clicks = hero_clicks + 1
-
-    return len(not_working_full_bars)
-
 def goToHeroes():
     if clickBtn(images['go-back-arrow']):
         global login_attempts
         login_attempts = 0
 
-    time.sleep(1)
+    # TODO: Verificar tempo para proxima ação
+    time.sleep(0.5)
     clickBtn(images['hero-icon'])
 
 def goToGame():
@@ -216,7 +137,6 @@ def goToGame():
     clickBtn(images['treasure-hunt-icon'])
 
 def refreshHeroesPositions():
-
     logger('Refreshing Heroes Positions')
     clickBtn(images['go-back-arrow'])
     clickBtn(images['treasure-hunt-icon'])
@@ -241,111 +161,116 @@ def login():
         time.sleep(5)
 
     if clickBtn(images['select-wallet-2'], timeout=8):
-        # sometimes the sign popup appears imediately
         login_attempts = login_attempts + 1
-        # print('sign button clicked')
-        # print('{} login attempt'.format(login_attempts))
         if clickBtn(images['treasure-hunt-icon'], timeout = 15):
-            # print('sucessfully login, treasure hunt btn clicked')
             login_attempts = 0
         return
-        # click ok button
 
     if clickBtn(images['select-wallet-2'], timeout = 20):
         login_attempts = login_attempts + 1
-        # print('sign button clicked')
-        # print('{} login attempt'.format(login_attempts))
-        # time.sleep(25)
         if clickBtn(images['treasure-hunt-icon'], timeout=25):
-            # print('sucessfully login, treasure hunt btn clicked')
             login_attempts = 0
-        # time.sleep(15)
 
     if clickBtn(images['ok'], timeout=5):
-        pass
-        # time.sleep(15)
-        # print('ok button clicked')
+         if clickBtn(images['treasure-hunt-icon'], timeout=25):
+            login_attempts = 0
+            pass
 
-def refreshHeroes():
+def sendHeroesToWork():
     logger('Search for heroes to work')
 
-    goToHeroes() 
+    goToHeroes()
 
-    if config['select_heroes_mode'] == "full":
-        logger('Sending heroes with full stamina bar to work', 'green')
-    elif config['select_heroes_mode'] == "green":
-        logger('Sending heroes with green stamina bar to work', 'green')
-    else:
-        logger('Sending all heroes to work', 'green')
+    logger('Sending all heroes to work', 'all')
 
-    buttonsClicked = 1
-    empty_scrolls_attempts = config['scroll_attemps']
-
-    while(empty_scrolls_attempts > 0 ):
-        if config['select_heroes_mode'] == 'full':
-            buttonsClicked = clickFullBarButtons()
-        elif config['select_heroes_mode'] == 'green':
-            buttonsClicked = clickGreenBarButtons()
+    failed_send_to_work = 0
+    # Tenta 3 vezes clicar no botão ALL
+    while (failed_send_to_work < 2):
+        if clickBtn(images['send-all-icon']):
+            break
         else:
-            buttonsClicked = clickButtons()
+            failed_send_to_work += 1
 
-        if buttonsClicked == 0:
-            empty_scrolls_attempts = empty_scrolls_attempts - 1
-        scroll()
-        time.sleep(2)
-    logger('{} heroes sent to work'.format(hero_clicks))
     goToGame()
 
-def main():
+def forceRefresh():
+    pyautogui.hotkey('ctrl','f5')
+    return
+
+def main(): 
     """Main execution setup and loop"""
-    # ==Setup==
-    global hero_clicks
+    # Setup
+
     global login_attempts
     global last_log_is_progress
-    hero_clicks = 0
     login_attempts = 0
     last_log_is_progress = False
 
     # Limpa o console para mensagem de inicio
     clearConsole()
 
+    # Carrega as imagens alvo
     global images
     images = load_images()
 
-    t = config['time_intervals']
+    # Carrega os intervalos de tempo do arquivo 
+    # TODO: Verificar se mantem carregamento por arquivo ou definir diretamente no código
+    time_interval = {
+        'check_for_login': 3,
+        'send_heroes_for_work': 10,
+        'check_for_new_map_button': 5,
+        'refresh_heroes_positions': 3,
+        'force_update': 10,
+    }
+    
+    #config['time_intervals']
+
     last = {
     "login" : 0,
     "heroes" : 0,
     "new_map" : 0,
-    "refresh_heroes" : 0
+    "refresh_heroes" : 0,
+    "force_update": 0
     }
 
     # ============
     while True:
+        # Fazer com que os click sejam simultaneos em várias contas
+        # Após cada ação verificar se alguma conta foi desconectada afim de manter a sincronia entre as contas
+        # A cada X tempo realizar o ctrl + F5 em todas as contas, evitando problemas nas contas
+        # Melhorar processo de reconhecimento das imagens
+
+        
         clearConsole()
         time.sleep(1)
+        sendHeroesToWork()
 
         while True:
+            #Verificador de tempo entre as ações do game
             now = time.time()
 
-            if now - last["login"] > t['check_for_login'] * 60:
+            if now - last["login"] > time_interval['check_for_login'] * 60:
                 sys.stdout.flush()
                 last["login"] = now
                 login()
 
-            if now - last["heroes"] > t['send_heroes_for_work'] * 60:
+            if now - last["heroes"] > time_interval['send_heroes_for_work'] * 60:
                 last["heroes"] = now
-                refreshHeroes()
+                sendHeroesToWork()
 
-            if now - last["new_map"] > t['check_for_new_map_button']:
+            if now - last["new_map"] > time_interval['check_for_new_map_button']:
                 last["new_map"] = now
 
             if clickBtn(images['new-map']):
                 loggerMapClicked()
 
-            if now - last["refresh_heroes"] > t['refresh_heroes_positions'] * 60:
+            if now - last["refresh_heroes"] > time_interval['refresh_heroes_positions'] * 60:
                 last["refresh_heroes"] = now
                 refreshHeroesPositions()
+
+            if now - last["force_update"] > time_interval['force_update'] * 60:
+                last["force_update"] = now
+                forceRefresh()
 
             logger(None, progress_indicator=True)
 
